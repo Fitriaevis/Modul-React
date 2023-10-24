@@ -74,65 +74,64 @@ function Mahasiswa(){
                 }
         };
 
-        //start Edit
-        const [editData, setEditData] = useState({
-            id: null,
-            nama: '',
-            nrp: '',
-            id_jurusan: ''
-        });
-
-        const [showEditModal, setShowEditModal] = useState(false);
-
-        const handleShowEditModal = (data) => {
-            setEditData(data);
-            setShowEditModal(true);
-            setShow(false);
-        };
-
-        const handleCloseEditModal = () =>{
-            setShowEditModal(false);
-            setEditData(null);
+        //start edit
+    const [editData, setEditData] = useState({
+        id: null,
+        nama: '',
+        nrp: '',
+        id_jurusan: null
+    });
+    
+    const [showEditModal, setShowEditModal] = useState(false);
+    
+    const handleShowEditModal = (data) => {
+        setEditData(data);
+        setShowEditModal(true);
+        setShow(false);
+    };
+    
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+    };
+    
+    const handleEditDataChange = (field, value) => {
+        setEditData((prevData) => ({
+        ...prevData,
+        [field]: value,
+        }));
+    };
+    
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+    
+        formData.append('id', editData.id);
+        formData.append('nama', editData.nama);
+        formData.append('nrp', editData.nrp);
+        formData.append('id_jurusan', editData.id_jurusan);
+    
+        if (editData.gambar) {
+        formData.append('gambar', editData.gambar);
         }
-
-        const handleEditDataChange = (field, value) => {
-            setEditData((prevData) => ({
-                ...prevData,
-                [field]: value,
-            }));
-        };
-
-        const handleUpdate = async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-
-            formData.append('id', editData.id);
-            formData.append('nama', editData.nama);
-            formData.append('nrp', editData.nrp);
-            formData.append('id_jurusan', editData.id_jurusan);
-
-            if(editData.gambar){
-                formData.append('gambar', editData.gambar);
-            }
-
-            if(editData.swa_foto){
-                formData.append('swa_foto', editData.swa_foto);
-            }
-
-            try{
-                await axios.patch(`http://localhost:3000/api/mhs/update/${editData.id}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                navigate('/mhs');
-                fectData();
-                setShowEditModal(false);
-            } catch(error){
-                console.error('Kesalahan: ', error);
-                setValidation(error.response.data);
-            }
-        };
+    
+        if (editData.swa_foto) {
+        formData.append('swa_foto', editData.swa_foto);
+        }
+    
+        try {
+        await axios.patch(`http://localhost:3000/api/mhs/update/${editData.id}`, formData, {
+            headers: {
+            'Content-Type': 'multipart/form-data',
+            },
+        });
+        navigate('/mhs');
+        fectData();
+        setShowEditModal(false);
+        } catch (error) {
+        console.error('Kesalahan: ', error);
+        setValidation(error.response.data);
+        }
+    };
 
     return(
         <Container>
@@ -144,6 +143,7 @@ function Mahasiswa(){
                     <thead>
                         <tr>
                         <th scope="col">No</th>
+                        <th scope="col">ID</th>
                         <th scope="col">Nama</th>
                         <th scope="col">NRP</th>
                         <th scope="col">Jurusan</th>
@@ -153,9 +153,10 @@ function Mahasiswa(){
                         </tr>
                     </thead>
                     <tbody>
-                        { mhs.map((mh, index)=> (
-                            <tr>
+                    {mhs.map((mh, index) => (
+                        <tr key={mh.id_m}>
                             <td>{index + 1}</td>
+                            <td>{ mh.id}</td>
                             <td>{ mh.nama}</td>
                             <td>{ mh.nrp}</td>
                             <td>{ mh.jurusan}</td>
@@ -168,6 +169,7 @@ function Mahasiswa(){
                 </table>
                 </Col>
             </Row>
+
             {/* tambahData */}
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
@@ -225,12 +227,13 @@ function Mahasiswa(){
                         <div className="mb-3">
                             <label className="form-label">Jurusan:</label>
                             <select type="text" className="form-select" value={editData ? editData.id_jurusan : ''} onChange={(e) => handleEditDataChange('id_jurusan', e.target.value)}>
-                                {jrs.map((jr) => (
-                                    <option key={jr.id_j} value={jr.id_j}>
-                                        {jr.nama_jurusan}
-                                    </option>
-                                ))}
-                                </select>
+                                <option key={editData.id_jurusan} value={editData.id_jurusan}>{editData.jurusan}</option>
+                                    {jrs.map((jr) => (
+                                        <option key={jr.id_j} value={jr.id_j}>
+                                            {jr.nama_jurusan}
+                                        </option>
+                                    ))}
+                            </select>
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Gambar:</label>
