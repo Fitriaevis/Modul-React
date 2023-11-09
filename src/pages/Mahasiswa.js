@@ -1,9 +1,11 @@
 import { Container, Row, Col, Button, Modal } from 'react-bootstrap';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+const token = localStorage.getItem('token');
 
 function Mahasiswa(){
+    console.log(token);
     const [mhs, setMhs] = useState([]);
     const [jrs, setJrsn] = useState([]);
     const url = "http://localhost:3000/static/";
@@ -11,15 +13,22 @@ function Mahasiswa(){
         fectData();
     }, []);
     const fectData = async () => {
-        const response1 = await axios.get('http://localhost:3000/api/mhs');
-        const data1 = await response1.data.data;
-        setMhs(data1);
-        
-        const response2 = await axios.get('http://localhost:3000/api/jurusan');
-        const data2 = await response2.data.data;
-        setJrsn(data2);
-        
-    }
+      
+        try {
+          const headers = {
+            Authorization: `Bearer ${token}`,
+          };
+          const response1 = await axios.get('http://localhost:3000/api/mhs',{headers});
+          const response2 = await axios.get('http://localhost:3000/api/jurusan',{headers});
+          const data1 = response1.data.data;
+          const data2 = response2.data.data;
+          setMhs(data1);
+          setJrsn(data2);
+        } catch (error) {
+          // Tangani kesalahan permintaan data
+          console.error('Gagal mengambil data:', error);
+        }
+      };
 
     const [show, setShow] = useState(false);
         const handleClose = () => setShow(false);
@@ -64,6 +73,7 @@ function Mahasiswa(){
                     await axios.post('http://localhost:3000/api/mhs/store', formData, {
                         headers: {
                             'Content-type' : 'multipart/form-data',
+                            'Authorization': `Bearer ${token}`,
                         },
                     });
                     navigate('/mhs');
@@ -135,7 +145,11 @@ function Mahasiswa(){
 
     const handleDelete = (id) => {
         axios
-        .delete(`http://localhost:3000/api/mhs/delete/${id}`)
+        .delete(`http://localhost:3000/api/mhs/delete/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
         .then((response) => {
             console.log('Data berhasil dihapus');
             //Hapus item dari array data mhs

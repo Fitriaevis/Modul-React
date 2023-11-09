@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const token = localStorage.getItem('token');
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 function Jurusan(){
     const [jrs, setJrsn] = useState([]);
     // const url = "http://localhost:3000/static/";
@@ -10,12 +12,19 @@ function Jurusan(){
         fectData();
     }, []);
     const fectData = async () => {
+        try {
+            const headers = {
+              Authorization: `Bearer ${token}`,
+            };
         const response1 = await axios.get('http://localhost:3000/api/jurusan');
         const data1 = await response1.data.data;
         setJrsn(data1);
+    } catch (error) {
+        // Tangani kesalahan permintaan data
+        console.error('Gagal mengambil data:', error);
+      }
     }
 
-    //start create
     const [show, setShow] = useState(false);
         const handleClose = () => setShow(false);
         const handleShow = () => setShow(true);
@@ -43,7 +52,7 @@ function Jurusan(){
                 });
             
                 if (response.status === 201) {
-                    navigate('/jrs');
+                    navigate('/jrsn');
                     fectData();
                 } else {
                     console.error('Respon tidak berhasil:', response);
@@ -55,9 +64,7 @@ function Jurusan(){
                 }
                 }
             };
-    //end create
 
-    //start edit
     const [editData, setEditData] = useState({
         id_j: null,
         nama_jurusan: ''
@@ -103,9 +110,7 @@ function Jurusan(){
         setValidation(error.response.data);
         }
     };
-    //end edit
-
-    //start delete
+    
     const handleDelete = (id) => {
         axios
         .delete(`http://localhost:3000/api/jurusan/delete/${id}`)
@@ -120,8 +125,7 @@ function Jurusan(){
             alert('Gagal menghapus data. Silahkan coba lagi atau hubungi administrator.');
         });
     };
-    //end delete
-
+    
     return(
         <Container>
             <Row>
